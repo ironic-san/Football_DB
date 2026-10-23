@@ -1,0 +1,18 @@
+import { AlertCircle, ArrowUpRight, LoaderCircle, SearchX } from 'lucide-react'
+import { Link } from 'react-router-dom'
+
+const config = {
+  players: { label: 'players', id: 'playerId', name: 'player', route: (id) => `/players/${encodeURIComponent(id)}`, secondary: (item) => [item.nationality, item.position].filter(Boolean).join(' · ') },
+  clubs: { label: 'clubs', id: 'clubId', name: 'club', route: (id) => `/clubs/${encodeURIComponent(id)}`, secondary: () => '' },
+  leagues: { label: 'leagues', id: 'leagueId', name: 'league', route: (id) => `/leagues/${encodeURIComponent(id)}`, secondary: (item) => [item.country, item.tier ? `Tier ${item.tier}` : ''].filter(Boolean).join(' · ') },
+}
+
+export function SearchResults({ category, status, results, count, error, onRetry }) {
+  const details = config[category]
+  if (status === 'idle') return <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white/60 p-8 text-center text-sm text-slate-500">Search the archive to see matching {details.label}.</div>
+  if (status === 'loading') return <div className="mt-8 flex items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white p-10 text-sm text-slate-600"><LoaderCircle className="animate-spin text-pitch" size={20} /> Searching the football archive…</div>
+  if (status === 'error') return <div role="alert" className="mt-8 flex flex-col items-center rounded-2xl border border-red-200 bg-red-50 p-8 text-center"><AlertCircle className="text-red-600" size={24} /><p className="mt-3 font-semibold text-red-900">Search could not be completed</p><p className="mt-1 max-w-md text-sm text-red-700">{error}</p><button onClick={onRetry} className="focus-ring mt-5 rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">Try again</button></div>
+  if (!results.length) return <div className="mt-8 flex flex-col items-center rounded-2xl border border-slate-200 bg-white p-10 text-center"><SearchX className="text-slate-400" size={26} /><p className="mt-3 font-semibold text-ink">No {details.label} found</p><p className="mt-1 text-sm text-slate-500">Try a different spelling or a broader search term.</p></div>
+
+  return <section className="mt-8" aria-live="polite" aria-labelledby="search-results-heading"><div className="mb-3 flex items-center justify-between gap-3"><h2 id="search-results-heading" className="text-lg font-bold text-ink">Search results</h2><span className="text-sm text-slate-500">{count} {details.label}</span></div><div className="grid gap-3">{results.map((item, index) => { const id = item[details.id]; const name = item[details.name] || 'Unnamed result'; const secondary = details.secondary(item); return id ? <Link key={`${id}-${index}`} to={details.route(id)} className="focus-ring surface group flex items-center justify-between gap-4 p-4 transition-colors hover:border-green-200"><span className="min-w-0"><span className="block truncate font-semibold text-ink group-hover:text-pitch-dark">{name}</span>{secondary && <span className="mt-1 block truncate text-sm text-slate-500">{secondary}</span>}</span><ArrowUpRight className="shrink-0 text-slate-300 group-hover:text-pitch" size={19} aria-hidden="true" /></Link> : <Link key={`missing-${index}`} to={`/resolve/${category}?name=${encodeURIComponent(name)}`} className="focus-ring surface p-4"><span className="block font-semibold text-ink">{name}</span>{secondary && <span className="mt-1 block text-sm text-slate-500">{secondary}</span>}<span className="mt-2 block text-xs text-pitch">Find this {details.label.slice(0, -1)} profile</span></Link> })}</div></section>
+}

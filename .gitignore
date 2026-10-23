@@ -1,0 +1,25 @@
+# Environment secrets
+.env
+.env.*
+!.env.example
+**/.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Frontend dependencies and builds
+**/node_modules/
+**/dist/
+
+# Logs
+*.log
+
+# Neo4j runtime files
+**/data/
+**/logs/
+**/transactions/
+**/metrics/
